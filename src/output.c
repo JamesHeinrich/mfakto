@@ -491,6 +491,23 @@ void getOSJSON(char* string)
     sprintf(string, ", \"os\":{\"os\": \"%s\", \"architecture\": \"%s\"}", getOS(), getArchitecture());
 }
 
+// Function to convert a byte array to a hexadecimal string
+char* bytesToHexString(const unsigned char* bytes, size_t len) {
+    // Each byte becomes two hex characters, plus one for the null terminator
+    char* hexString = (char*)malloc(len * 2 + 1);
+    if (hexString == NULL) {
+        perror("Failed to allocate memory for hex string");
+        return NULL;
+    }
+
+    for (size_t i = 0; i < len; i++) {
+        sprintf(&hexString[i * 2], "%02x", bytes[i]);
+    }
+    hexString[len * 2] = '\0'; // Null-terminate the string
+
+    return hexString;
+}
+
 static int cmp_int96(const void* p1, const void* p2)
 {
     int96* a = (int96*)p1, * b = (int96*)p2;
@@ -614,15 +631,10 @@ void print_result_line(mystuff_t *mystuff, int factorsfound)
              getOS(), getArchitecture(), timestamp);
   json_checksum = crc32_checksum(json_checksum_string, strlen(json_checksum_string));
 
-  char json_checksum_string_hex[1500];
-  int i = 0;
-  while (json_checksum_string[i] != '\0') {
-    json_checksum_string_hex += sprintf("%02x", json_checksum_string[i]);
-    i++;
-  }
+  char* json_checksum_res256 = bytesToHexString(json_checksum_string, sizeof(json_checksum_string));
 
   sprintf(jsonstring, "{\"exponent\":%u, \"worktype\":\"TF\", \"status\":\"%s\", \"bitlo\":%d, \"bithi\":%d, \"rangecomplete\":%s%s, \"program\":{\"name\":\"mfakto\", \"version\":\"%s\", \"kernel\":\"%s\"}, \"timestamp\":\"%s\"%s%s%s%s, \"checksum\":{\"version\":%u, \"checksum\":\"%08X\", \"res256\":\"%s\"}}",
-      mystuff->exponent, factorsfound > 0 ? "F" : "NF", mystuff->bit_min, mystuff->bit_max_stage, partialresult ? "false" : "true", factorjson, SHORT_MFAKTO_VERSION, mystuff->stats.kernelname, timestamp, userjson, computerjson, aidjson, osjson, MFAKTO_CHECKSUM_VERSION, json_checksum, json_checksum_string_hex);
+      mystuff->exponent, factorsfound > 0 ? "F" : "NF", mystuff->bit_min, mystuff->bit_max_stage, partialresult ? "false" : "true", factorjson, SHORT_MFAKTO_VERSION, mystuff->stats.kernelname, timestamp, userjson, computerjson, aidjson, osjson, MFAKTO_CHECKSUM_VERSION, json_checksum, json_checksum_res256);
 
   if(mystuff->mode != MODE_SELFTEST_SHORT)
   {
