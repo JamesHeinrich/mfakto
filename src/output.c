@@ -631,7 +631,8 @@ void print_result_line(mystuff_t *mystuff, int factorsfound)
              getOS(), getArchitecture(), timestamp);
   json_checksum = crc32_checksum(json_checksum_string, strlen(json_checksum_string));
 
-  char* json_checksum_res256 = bytesToHexString(json_checksum_string, sizeof(json_checksum_string));
+  size_t arrayLen = sizeof(json_checksum_string);
+  char* json_checksum_res256 = bytesToHexString(json_checksum_string, arrayLen);
 
   sprintf(jsonstring, "{\"exponent\":%u, \"worktype\":\"TF\", \"status\":\"%s\", \"bitlo\":%d, \"bithi\":%d, \"rangecomplete\":%s%s, \"program\":{\"name\":\"mfakto\", \"version\":\"%s\", \"kernel\":\"%s\"}, \"timestamp\":\"%s\"%s%s%s%s, \"checksum\":{\"version\":%u, \"checksum\":\"%08X\", \"res256\":\"%s\"}}",
       mystuff->exponent, factorsfound > 0 ? "F" : "NF", mystuff->bit_min, mystuff->bit_max_stage, partialresult ? "false" : "true", factorjson, SHORT_MFAKTO_VERSION, mystuff->stats.kernelname, timestamp, userjson, computerjson, aidjson, osjson, MFAKTO_CHECKSUM_VERSION, json_checksum, json_checksum_res256);
